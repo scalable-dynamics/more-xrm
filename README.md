@@ -1,11 +1,13 @@
 # more-xrm
 
-Create more applications using the Microsoft Dynamics Xrm platform. more-xrm enables querying the dynamics data model from any application.
+Create more applications using the Microsoft Dynamics Xrm platform
 
-## Example
+> more-xrm enables querying the dynamics data model from any application
 
-`
-export async function DynamicsClientSample() {
+## TypeScript Example
+
+```typescript
+async function DynamicsClientSample() {
     const dynamicsClient = dynamics();
 
     const allAccounts = await dynamicsClient.batch()
@@ -23,18 +25,20 @@ export async function DynamicsClientSample() {
 
     return <Grid data={xrmAccounts} />;
 }
-`
+```
 
 ## Interfaces
 
-`
-export interface Dynamics {
+```typescript
+interface Dynamics {
     batch(): DynamicsBatch;
     fetch<T>(query: Query, maxRowCount?: number): Promise<T[]>;
     save(entitySetName: string, data: any, id?: string): Promise<string>;
 }
+```
 
-export interface DynamicsBatch {
+```typescript
+interface DynamicsBatch {
     execute(): Promise<any[]>;
     request(query: Query, maxRowCount?: number): DynamicsBatch;
     requestAll(queries: Query[]): DynamicsBatch;
@@ -43,8 +47,10 @@ export interface DynamicsBatch {
         createRelatedEntity(entitySetName: string, data: any, navigationPropertyName: string): void
     };
 }
+```
 
-export interface Query {
+```typescript
+interface Query {
     alias(attributeName: string, alias: string): Query;
     path(entityPath: string): Query;
     select(...attributeNames: string[]): Query;
@@ -53,22 +59,28 @@ export interface Query {
     orderBy(attributeName: string, isDescendingOrder?: boolean): Query;
     join(entityName: string, fromAttribute: string, toAttribute?: string, alias?: string, isOuterJoin?: boolean): Query;
 }
-`
+```
 
 ## Functions
 
-`
+```typescript
 function dynamics(accessToken?: string): Dynamics
+```
 
+```typescript
 function dynamicsQuery<T>(query: Query, maxRowCount?: number, headers?: any): Promise<T[]>;
 function dynamicsQueryUrl<T>(dynamicsEntitySetUrl: string, query: Query, maxRowCount?: number, headers?: any): Promise<T[]>;
 function dynamicsRequest<T>(dynamicsEntitySetUrl: string, headers?: any): Promise<T>;
 function dynamicsSave(entitySetName: string, data: any, id?: string, headers?: any): Promise<string>;
+```
 
+```typescript
 function dynamicsBatch(headers?: any): DynamicsBatch;
 function dynamicsBatchRequest<T = any>(...url: string[]): Promise<T[]>;
 function dynamicsBatchQuery<T = any>(...query: Query[]): Promise<T[]>;
+```
 
+```typescript
 function query(entityName: string, ...attributeNames: string[]): Query;
 function GetQueryXml(query: Query, maxRowCount?: number, format?: boolean): string;
-`
+```
