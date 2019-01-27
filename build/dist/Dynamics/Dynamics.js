@@ -1,3 +1,4 @@
+import query from "../Query/Query";
 import { dynamicsQuery, dynamicsSave, dynamicsRequest } from "./DynamicsRequest";
 import { dynamicsBatch } from "./DynamicsBatch";
 export const WebApiVersion = 'v9.1';
@@ -12,11 +13,9 @@ export default function dynamics(accessToken) {
 }
 class DynamicsClient {
     constructor(accessToken) {
-        if (accessToken) {
-            this.dynamicsHeaders = {
-                'Authorization': 'Bearer ' + accessToken
-            };
-        }
+        this.dynamicsHeaders = accessToken && {
+            'Authorization': 'Bearer ' + accessToken
+        };
     }
     batch() {
         return dynamicsBatch(this.dynamicsHeaders);
@@ -24,13 +23,17 @@ class DynamicsClient {
     fetch(query, maxRowCount = DefaultMaxRecords) {
         return dynamicsQuery(query, maxRowCount, this.dynamicsHeaders);
     }
-    save(entitySetName, data, id) {
-        return dynamicsSave(entitySetName, data, id, this.dynamicsHeaders);
-    }
     optionset(entityName, attributeName) {
-        return dynamicsRequest(`/api/data/${WebApiVersion}/EntityDefinitions(LogicalName='${entityName}')/Attributes(LogicalName='${attributeName}')/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet($select=Options),GlobalOptionSet($select=Options)`).then(attribute => (attribute.OptionSet || attribute.GlobalOptionSet).Options.map((option) => ({
-            label: option.Label.UserLocalizedLabel.Label,
+        return dynamicsRequest(`/api/data/${WebApiVersion}/EntityDefinitions(LogicalName='${entityName}')/Attributes(LogicalName='${attributeName}')/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet($select=Options),GlobalOptionSet($select=Options)`, this.dynamicsHeaders)
+            .then(attribute => (attribute.OptionSet || attribute.GlobalOptionSet).Options.map((option) => ({
+            label: (option.Label && option.Label.UserLocalizedLabel && option.Label.UserLocalizedLabel.Label),
             value: option.Value
         })));
+    }
+    query(entityLogicalName, entitySetName) {
+        return query(entityLogicalName).path(entitySetName);
+    }
+    save(entitySetName, data, id) {
+        return dynamicsSave(entitySetName, data, id, this.dynamicsHeaders);
     }
 }

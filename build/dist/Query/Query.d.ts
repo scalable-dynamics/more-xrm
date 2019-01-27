@@ -23,12 +23,13 @@ export interface Query {
     alias(attributeName: string, alias: string): Query;
     path(entityPath: string): Query;
     select(...attributeNames: string[]): Query;
-    where(attributeName: string, operator: QueryOperator, ...values: any[]): Query;
-    whereAny(any: (or: (attributeName: string, operator: QueryOperator, ...values: any[]) => void) => void): Query;
+    where(attributeName: string, operator: QueryOperatorParam, ...values: any[]): Query;
+    whereAny(any: (or: (attributeName: string, operator: QueryOperatorParam, ...values: any[]) => void) => void): Query;
     orderBy(attributeName: string, isDescendingOrder?: boolean): Query;
     join(entityName: string, fromAttribute: string, toAttribute?: string, alias?: string, isOuterJoin?: boolean): Query;
     Query: DataQuery;
 }
+export declare type QueryOperatorParam = QueryOperator | QueryOperatorExpression;
 export declare enum QueryOperator {
     Contains = "like",
     StartsWith = "begins-with",
@@ -46,5 +47,6 @@ export declare enum QueryOperator {
     IsNotCurrentUser = "ne-userid",
     IsCurrentUserTeam = "eq-userteams"
 }
+export declare type QueryOperatorExpression = 'like' | 'begins-with' | 'eq' | 'neq' | 'gt' | 'lt' | 'in' | 'not-in' | 'on-or-before' | 'on-or-after' | 'null' | 'not-null' | 'eq-userid' | 'ne-userid' | 'eq-userteams';
 export default function query(entityName: string, ...attributeNames: string[]): Query;
 export declare function GetRootQuery(query: Query): DataQuery;

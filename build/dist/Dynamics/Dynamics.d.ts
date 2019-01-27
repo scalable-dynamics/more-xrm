@@ -10,6 +10,11 @@ export declare const DynamicsHeaders: {
 export interface Dynamics {
     batch(): DynamicsBatch;
     fetch<T>(query: Query, maxRowCount?: number): Promise<T[]>;
+    optionset(entityName: any, attributeName: any): Promise<{
+        label: string;
+        value: number;
+    }[]>;
+    query(entityLogicalName: string, entitySetName: string): Query;
     save(entitySetName: string, data: any, id?: string): Promise<string>;
 }
 export default function dynamics(accessToken?: string): Dynamics;

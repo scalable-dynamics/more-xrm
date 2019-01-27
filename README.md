@@ -4,6 +4,13 @@ Create more applications using the Microsoft Dynamics Xrm platform
 
 > more-xrm enables querying the dynamics data model from any application
 
+License: [MIT](http://www.opensource.org/licenses/mit-license.php)
+
+## NPM
+The package name is more-xrm, you can find it here:
+
+[![NPM version](https://img.shields.io/npm/v/more-xrm.svg?style=flat)](https://www.npmjs.com/package/more-xrm)
+
 ## TypeScript Example
 
 ```typescript
@@ -30,6 +37,8 @@ async function DynamicsClientSample() {
 ## Interfaces
 
 ```typescript
+//example: const dynamicsClient = dynamics();
+
 interface Dynamics {
     batch(): DynamicsBatch;
     fetch<T>(query: Query, maxRowCount?: number): Promise<T[]>;
@@ -38,6 +47,8 @@ interface Dynamics {
 ```
 
 ```typescript
+//example: const dynamicsBatch = dynamics().batch();
+
 interface DynamicsBatch {
     execute(): Promise<any[]>;
     request(query: Query, maxRowCount?: number): DynamicsBatch;
@@ -50,6 +61,8 @@ interface DynamicsBatch {
 ```
 
 ```typescript
+//example: const dynamicsQuery = dynamics().query('entityLogicalName','entitySetName');
+
 interface Query {
     alias(attributeName: string, alias: string): Query;
     path(entityPath: string): Query;
@@ -61,10 +74,24 @@ interface Query {
 }
 ```
 
+```typescript
+//example: const dynamicsMetadata = dynamicsMetadata();
+
+interface DynamicsMetadata {
+    attributes(entityName: string): Promise<AttributeMetadata[]>;
+    entities(): Promise<EntityMetadata[]>;
+    entity(entityName: string): Promise<EntityAttributeMetadata>;
+}
+```
+
 ## Functions
 
 ```typescript
 function dynamics(accessToken?: string): Dynamics
+```
+
+```typescript
+function dynamicsMetadata(accessToken?: string): DynamicsMetadata;
 ```
 
 ```typescript

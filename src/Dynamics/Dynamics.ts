@@ -1,4 +1,4 @@
-import { Query } from "../Query/Query";
+import query, { Query } from "../Query/Query";
 import { dynamicsQuery, dynamicsSave, dynamicsRequest } from "./DynamicsRequest";
 import { dynamicsBatch, DynamicsBatch } from "./DynamicsBatch";
 
@@ -13,6 +13,8 @@ export const DynamicsHeaders = {
 export interface Dynamics {
     batch(): DynamicsBatch;
     fetch<T>(query: Query, maxRowCount?: number): Promise<T[]>;
+    optionset(entityName: any, attributeName: any): Promise<{ label: string, value: number }[]>;
+    query(entityLogicalName: string, entitySetName: string): Query;
     save(entitySetName: string, data: any, id?: string): Promise<string>;
 }
 
@@ -24,10 +26,8 @@ class DynamicsClient implements Dynamics {
     private dynamicsHeaders: any;
 
     constructor(accessToken?: string) {
-        if (accessToken) {
-            this.dynamicsHeaders = {
-                'Authorization': 'Bearer ' + accessToken
-            }
+        this.dynamicsHeaders = accessToken && {
+            'Authorization': 'Bearer ' + accessToken
         }
     }
 
@@ -35,22 +35,30 @@ class DynamicsClient implements Dynamics {
         return dynamicsBatch(this.dynamicsHeaders);
     }
 
-    fetch<T>(query: Query, maxRowCount: number = DefaultMaxRecords): Promise<T[]> {
+    fetch<T>(query: Query, maxRowCount: number = DefaultMaxRecords): Promise<T[]>
+    {
         return dynamicsQuery<T>(query, maxRowCount, this.dynamicsHeaders);
     }
 
-    save(entitySetName: string, data: any, id?: string): Promise<string> {
-        return dynamicsSave(entitySetName, data, id, this.dynamicsHeaders);
-    }
-
-    optionset(entityName: any, attributeName: any): Promise<{ label: string, value: number }[]> {
-        return dynamicsRequest<any>(`/api/data/${WebApiVersion}/EntityDefinitions(LogicalName='${entityName}')/Attributes(LogicalName='${attributeName}')/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet($select=Options),GlobalOptionSet($select=Options)`).then(attribute =>
+    optionset(entityName: any, attributeName: any): Promise<{ label: string, value: number }[]>
+    {
+        return dynamicsRequest<any>(`/api/data/${WebApiVersion}/EntityDefinitions(LogicalName='${entityName}')/Attributes(LogicalName='${attributeName}')/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet($select=Options),GlobalOptionSet($select=Options)`, this.dynamicsHeaders)
+        .then(attribute =>
             (attribute.OptionSet || attribute.GlobalOptionSet).Options.map(
                 (option) => ({
-                    label: option.Label.UserLocalizedLabel.Label,
+                    label: (option.Label && option.Label.UserLocalizedLabel && option.Label.UserLocalizedLabel.Label),
                     value: option.Value
                 })
             )
         );
+    }
+
+    query(entityLogicalName: string, entitySetName: string): Query
+    {
+        return query(entityLogicalName).path(entitySetName);
+    }
+
+    save(entitySetName: string, data: any, id?: string): Promise<string> {
+        return dynamicsSave(entitySetName, data, id, this.dynamicsHeaders);
     }
 }

@@ -1,0 +1,43 @@
+{
+  "name": "more-xrm",
+  "version": "0.1.1",
+  "private": false,
+  "author": {
+    "name": "Greg DeCarlo",
+    "email": "greg@scalabledynamicsllc.com",
+    "url": "http://www.scalabledynamicsllc.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scalable-dynamics/more-xrm.git"
+  },
+  "homepage": "https://github.com/scalable-dynamics/more-xrm",
+  "description": "Create more applications using the Microsoft Dynamics Xrm platform, enables querying the dynamics data model from any application.",
+  "keywords": [
+    "Microsoft",
+    "Dynamics",
+    "365",
+    "PowerApps",
+    "TypeScript",
+    "React",
+    "API",
+    "Xrm",
+    "more-xrm",
+    "query",
+    "entity",
+    "fetchxml",
+    "odata",
+    "webapi",
+    "fetch",
+    "metadata",
+    "optionset",
+    "batch"
+  ],
+  "main": "build/dist/more-xrm.js",
+  "module": "build/dist/Dynamics/Dynamics.js",
+  "typings": "build/dist/more-xrm.d.ts",
+  "devDependencies": {
+    "typescript": "^3.2.2"
+  }
+}
