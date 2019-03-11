@@ -17,7 +17,6 @@ export interface DataQueryJoin extends DataQuery {
     JoinFromAttributeName?: string;
     JoinToAttributeName?: string;
     IsOuterJoin?: boolean;
-    RootQuery: Query;
 }
 export interface Query {
     alias(attributeName: string, alias: string): Query;
@@ -32,6 +31,7 @@ export interface Query {
 export declare type QueryOperatorParam = QueryOperator | QueryOperatorExpression;
 export declare enum QueryOperator {
     Contains = "like",
+    NotContains = "not-like",
     StartsWith = "begins-with",
     Equals = "eq",
     NotEquals = "neq",
@@ -47,6 +47,6 @@ export declare enum QueryOperator {
     IsNotCurrentUser = "ne-userid",
     IsCurrentUserTeam = "eq-userteams"
 }
-export declare type QueryOperatorExpression = 'like' | 'begins-with' | 'eq' | 'neq' | 'gt' | 'lt' | 'in' | 'not-in' | 'on-or-before' | 'on-or-after' | 'null' | 'not-null' | 'eq-userid' | 'ne-userid' | 'eq-userteams';
+export declare type QueryOperatorExpression = 'like' | 'not-like' | 'begins-with' | 'eq' | 'neq' | 'gt' | 'lt' | 'in' | 'not-in' | 'on-or-before' | 'on-or-after' | 'null' | 'not-null' | 'eq-userid' | 'ne-userid' | 'eq-userteams';
 export default function query(entityName: string, ...attributeNames: string[]): Query;
 export declare function GetRootQuery(query: Query): DataQuery;

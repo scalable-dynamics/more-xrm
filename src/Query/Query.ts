@@ -19,7 +19,6 @@ export interface DataQueryJoin extends DataQuery {
     JoinFromAttributeName?: string;
     JoinToAttributeName?: string;
     IsOuterJoin?: boolean;
-    RootQuery: Query;
 }
 
 export interface Query {
@@ -37,6 +36,7 @@ export type QueryOperatorParam = QueryOperator | QueryOperatorExpression;
 
 export enum QueryOperator {
     Contains = 'like',
+    NotContains = 'not-like',
     StartsWith = 'begins-with',
     Equals = 'eq',
     NotEquals = 'neq',
@@ -55,6 +55,7 @@ export enum QueryOperator {
 
 export type QueryOperatorExpression =
     'like' |
+    'not-like' |
     'begins-with' |
     'eq' |
     'neq' |
@@ -77,7 +78,6 @@ export default function query(entityName: string, ...attributeNames: string[]): 
 export function GetRootQuery(query: Query): DataQuery {
     return (query['RootQuery'] || query).Query;
 }
-
 class QueryProvider implements Query {
     public Query: DataQuery;
     public RootQuery: Query;
@@ -151,7 +151,7 @@ class QueryProvider implements Query {
     public join(entityName: string, fromAttribute: string, toAttribute?: string, alias?: string, isOuterJoin?: boolean): Query {
         var exp = new QueryProvider(entityName);
         var join = <DataQueryJoin>exp.Query;
-        join.RootQuery = this.RootQuery || this;
+        exp.RootQuery = this.RootQuery || this;
         join.JoinAlias = alias || entityName;
         join.JoinFromAttributeName = fromAttribute;
         join.JoinToAttributeName = toAttribute || this.EntityName + 'id';

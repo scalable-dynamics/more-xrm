@@ -1,6 +1,6 @@
 import query, { Query } from "../Query/Query";
-import { dynamicsQuery, dynamicsSave, dynamicsRequest } from "./DynamicsRequest";
 import { dynamicsBatch, DynamicsBatch } from "./DynamicsBatch";
+import { dynamicsQuery, dynamicsRequest, dynamicsSave } from "./DynamicsRequest";
 
 export const WebApiVersion = 'v9.1';
 export const DefaultMaxRecords = 100;

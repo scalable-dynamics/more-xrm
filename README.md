@@ -1,113 +1,122 @@
+<p align="center"><img src="https://oflow.azurewebsites.net/images/XrmToolsLogo.png" width="250" /></p>
+
 # more-xrm
 
-Create more applications using the Microsoft Dynamics Xrm platform
+[![](https://img.shields.io/npm/v/more-xrm.svg)](https://www.npmjs.com/package/more-xrm)
+[![npm](https://img.shields.io/npm/dt/more-xrm.svg)](https://www.npmtrends.com/more-xrm)
 
-> more-xrm enables querying the dynamics data model from any application
+Create more applications using the Microsoft Dynamics 365/XRM platform
 
-License: [MIT](http://www.opensource.org/licenses/mit-license.php)
+**`more-xrm`** is a TypeScript library that enables you to connect, query and manage Dynamics 365 data using the modern fetch api. Query operations and batch procedures are available for connecting to the Dynamics Web API.
 
-## NPM
-The package name is more-xrm, you can find it here:
+> **_more-xrm enables querying the dynamics data model from any application_**
 
-[![NPM version](https://img.shields.io/npm/v/more-xrm.svg?style=flat)](https://www.npmjs.com/package/more-xrm)
+* provides methods for querying and managing Dynamics 365 data
+* introduces **`Query`** interface for describing columns, filters and other query information
+* provides an easy way to retrieve data for a **`Query`**, with formatting and attribute alias names
+* introduces **`Batch`** interface for describing changesets and committing them in batch
+	* automatically sets related identifiers for parental records created within the same batch
+* provides methods for querying and managing Dynamics 365 Entity Metadata
+* retrieve information about Entities, Attributes and OptionSets in a concise format
+* request metadata for multiple entities and their attributes using a batch operation
 
-## TypeScript Example
+## Installation
+
+This module is designed for use with **[Microsoft Dynamics 365 Customer Engagement Web API](https://docs.microsoft.com/en-us/dynamics365/customer-engagement/developer/webapi/web-api-types-operations)** - either a Web Resource with a relative api path or an `authToken` with an associated system user record can be used.
+
+**From [unpkg](https://unpkg.com/) (cdn):**
+
+````html
+<script src="https://unpkg.com/more-xrm"></script>
+````
+
+>**_or_**
+
+**From [npm](https://npmjs.com/more-xrm):**
+
+```bash
+npm install more-xrm
+```
+___
+
+## How to use
+
+1. Import/Add the `dynamics` method from `'more-xrm/dist/Dynamics'`
+
+   > `import dynamics from 'more-xrm/dist/Dynamics';`
+
+2. Import/Add `query` method and `QueryOperator` enum from `'more-xrm/dist/Query'`
+
+   > `import query, { QueryOperator } from 'more-xrm/dist/Query';`
+
+3. Create a `query` for the Dynamics Account entity:
 
 ```typescript
-async function DynamicsClientSample() {
-    const dynamicsClient = dynamics();
-
-    const allAccounts = await dynamicsClient.batch()
-                                            .requestAllUrls(['accounts'])
-                                            .execute();
-
-    await dynamicsClient.save('accounts', { name: 'test' }, allAccounts[0].accountid);
-
-    const xrmAccounts = await dynamicsClient.fetch(
-        query('account').path('accounts')
-                        .where('name', QueryOperator.Contains, 'xrm')
-                        .orderBy('name')
-                        .select('name')
-    );
-
-    return <Grid data={xrmAccounts} />;
-}
+const accounts = query('account')
+					.path('accounts') // Indicates Entity Name on Web API Url
+					.where('name', QueryOperator.Contains, 'xrm')
+					.orderBy('name')
+					.select('name');
 ```
 
-## Interfaces
+4. Call `dynamics` to obtain a connection to Dynamics:
+
+   > `const dynamicsClient = dynamics(); //option to pass access token`
+
+5. Execute `accounts` query using `dynamicsClient`:
 
 ```typescript
-//example: const dynamicsClient = dynamics();
-
-interface Dynamics {
-    batch(): DynamicsBatch;
-    fetch<T>(query: Query, maxRowCount?: number): Promise<T[]>;
-    save(entitySetName: string, data: any, id?: string): Promise<string>;
-}
+dynamicsClient.fetch(accounts).then(results => { /* results is an array of accounts */ });
 ```
+
+6. Update data in Dynamics by calling `save`:
 
 ```typescript
-//example: const dynamicsBatch = dynamics().batch();
-
-interface DynamicsBatch {
-    execute(): Promise<any[]>;
-    request(query: Query, maxRowCount?: number): DynamicsBatch;
-    requestAll(queries: Query[]): DynamicsBatch;
-    requestAllUrls(urls: string[]): DynamicsBatch;
-    saveEntity(entitySetName: string, data: any, id?: string): DynamicsBatch & {
-        createRelatedEntity(entitySetName: string, data: any, navigationPropertyName: string): void
-    };
-}
+const accountId = accounts[0].accountid; //account with name like '%xrm%'
+dynamicsClient.save('accounts', { name: 'more-xrm' }, accountId).then(id => { /* id of account */ });
 ```
+
+## Example
+
+An application will query the Account entity in Dynamics where the name contains _'xrm'_, then update the Account name to _'more-xrm'_
+
 
 ```typescript
-//example: const dynamicsQuery = dynamics().query('entityLogicalName','entitySetName');
+import dynamics from 'more-xrm/dist/Dynamics';
+import query, { QueryOperator } from 'more-xrm/dist/Query';
 
-interface Query {
-    alias(attributeName: string, alias: string): Query;
-    path(entityPath: string): Query;
-    select(...attributeNames: string[]): Query;
-    where(attributeName: string, operator: QueryOperator, ...values: any[]): Query;
-    whereAny(any: (or: (attributeName: string, operator: QueryOperator, ...values: any[]) => void) => void): Query;
-    orderBy(attributeName: string, isDescendingOrder?: boolean): Query;
-    join(entityName: string, fromAttribute: string, toAttribute?: string, alias?: string, isOuterJoin?: boolean): Query;
-}
+//Create a query
+const accounts = query('account')
+                    .path('accounts') // Indicates Entity Name on Web API Url
+                    .where('name', QueryOperator.Contains, 'xrm')
+                    .orderBy('name')
+                    .select('name');
+
+//Connect to Dynamics
+const dynamicsClient = dynamics();
+
+//Execute accounts query
+dynamicsClient.fetch(accounts).then(results => { 
+
+    if(results.length > 0) {
+        const accountId = accounts[0].accountid;
+
+        //Update data in Dynamics by calling save:
+        dynamicsClient.save('accounts', { name: 'more-xrm' }, accountId).then(id => {
+            
+            /* Account was updated */
+
+        });
+    }
+});
+
 ```
 
-```typescript
-//example: const dynamicsMetadata = dynamicsMetadata();
+## License
 
-interface DynamicsMetadata {
-    attributes(entityName: string): Promise<AttributeMetadata[]>;
-    entities(): Promise<EntityMetadata[]>;
-    entity(entityName: string): Promise<EntityAttributeMetadata>;
-}
-```
+[MIT License](https://github.com/scalable-dynamics/more-xrm/blob/master/LICENSE)
 
-## Functions
+<svg height="32" viewBox="0 0 14 16" version="1.1" width="28" aria-hidden="true" style="float:left;margin-right:10px;"><path fill-rule="evenodd" d="M7 4c-.83 0-1.5-.67-1.5-1.5S6.17 1 7 1s1.5.67 1.5 1.5S7.83 4 7 4zm7 6c0 1.11-.89 2-2 2h-1c-1.11 0-2-.89-2-2l2-4h-1c-.55 0-1-.45-1-1H8v8c.42 0 1 .45 1 1h1c.42 0 1 .45 1 1H3c0-.55.58-1 1-1h1c0-.55.58-1 1-1h.03L6 5H5c0 .55-.45 1-1 1H3l2 4c0 1.11-.89 2-2 2H2c-1.11 0-2-.89-2-2l2-4H1V5h3c0-.55.45-1 1-1h4c.55 0 1 .45 1 1h3v1h-1l2 4zM2.5 7L1 10h3L2.5 7zM13 10l-1.5-3-1.5 3h3z"></path></svg>
 
-```typescript
-function dynamics(accessToken?: string): Dynamics
-```
-
-```typescript
-function dynamicsMetadata(accessToken?: string): DynamicsMetadata;
-```
-
-```typescript
-function dynamicsQuery<T>(query: Query, maxRowCount?: number, headers?: any): Promise<T[]>;
-function dynamicsQueryUrl<T>(dynamicsEntitySetUrl: string, query: Query, maxRowCount?: number, headers?: any): Promise<T[]>;
-function dynamicsRequest<T>(dynamicsEntitySetUrl: string, headers?: any): Promise<T>;
-function dynamicsSave(entitySetName: string, data: any, id?: string, headers?: any): Promise<string>;
-```
-
-```typescript
-function dynamicsBatch(headers?: any): DynamicsBatch;
-function dynamicsBatchRequest<T = any>(...url: string[]): Promise<T[]>;
-function dynamicsBatchQuery<T = any>(...query: Query[]): Promise<T[]>;
-```
-
-```typescript
-function query(entityName: string, ...attributeNames: string[]): Query;
-function GetQueryXml(query: Query, maxRowCount?: number, format?: boolean): string;
-```
+*more-xrm* is licensed under the
+[MIT](https://github.com/scalable-dynamics/more-xrm/blob/master/LICENSE) license
